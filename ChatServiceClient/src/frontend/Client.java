@@ -24,7 +24,6 @@ public class Client {
 			Scanner keyboard = new Scanner(System.in);
 			
 			Thread reciever = new Thread(new Runnable() {
-
 				@Override
 				public void run() {
 					while(run) {
@@ -40,7 +39,6 @@ public class Client {
 			while(run) {
 				if(System.in.available() != 0) output.println(keyboard.nextLine());
 			}
-			
 			
 			keyboard.close();
 			input.close();
