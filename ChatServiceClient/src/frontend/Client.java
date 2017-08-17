@@ -16,8 +16,7 @@ public class Client {
 	public static void main(String[] args) {
 		System.out.println("Versuche Verbindung mit Server aufzubauen...");
 		
-		try {
-			Socket socket = new Socket("10.61.14.182", 5555);
+		try (Socket socket = new Socket("10.61.14.182", 5555)){
 			System.out.println("Verbindung aufgebaut!");
 			PrintWriter output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 			Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
@@ -43,7 +42,6 @@ public class Client {
 			keyboard.close();
 			input.close();
 			output.close();
-			socket.close();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -51,4 +49,5 @@ public class Client {
 	public static void lock() {
 		run = false;
 	}
+
 }
