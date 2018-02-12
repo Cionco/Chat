@@ -11,10 +11,17 @@ public enum Command {
 		public void execute(ConnectionSocket s, String[] params) {
 			ConnectionSocket.close(s);
 		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("Closes all open connections and quits program");
+			s.sendServerMessage("Usage of /quit:\n\t/quit");
+		}
 	},
 	Q {
 		public void execute(ConnectionSocket s, String[] params) throws ArrayIndexOutOfBoundsException, UnknownHostException {
 			QUIT.execute(s, null);
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("See /quit");
 		}
 	},
 	WITH {
@@ -22,12 +29,16 @@ public enum Command {
 			s.setMainConnection(s.findConnectionByIp(InetAddress.getByName(params[1])));
 		}
 		public void help(ConnectionSocket s) {
-			s.sendServerMessage("Use of /with:\n\t/with <destination ip addresss>");
+			s.sendServerMessage("Set Main Connection to <destination ip adress>");
+			s.sendServerMessage("Usage of /with:\n\t/with <destination ip adress>");
 		}
 	},
 	W {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			WITH.execute(s, params);
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("See /with");
 		}
 	},
 	CONNECT {
@@ -40,12 +51,16 @@ public enum Command {
 				socket.sendServerMessage(s.getSocket().getInetAddress() + " has just connected to you!");
 		}
 		public void help(ConnectionSocket s) {
-			s.sendServerMessage("Use of /connect:\n\t/connect <ip address of intended connection>");
+			s.sendServerMessage("Add <ip adress> to list of connections");
+			s.sendServerMessage("Usage of /connect:\n\t/connect <ip adress of intended connection>");
 		}
 	},
 	C {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			CONNECT.execute(s, params);
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("See /connect");
 		}
 	},
 	DISCONNECT {
@@ -56,20 +71,34 @@ public enum Command {
 			s.removeConnection(InetAddress.getByName(params[1]));
 			s.sendServerMessage(socket.getSocket().getInetAddress() + " is no longer connected to you!");
 		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("End connection to <ip adress>");
+			s.sendServerMessage("Usage of /disconnect:\n\t/disconnect <ip adress>");
+		}
 	},
 	DC {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			DISCONNECT.execute(s, params);
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("See /disconnect");
 		}
 	},
 	DISCONNECTALL {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			for(Connection c : s.getConnections()) DISCONNECT.execute(s, new String[]{"", c.getIP().toString().substring(1)});
 		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("End connection to all connected IPs");
+			s.sendServerMessage("Usage of /disconnectall:\n\t/disconnectall");
+		}
 	},
 	DCA {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			DISCONNECTALL.execute(s, params);
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("See /disconnectall");
 		}
 	},
 	TO {
@@ -77,7 +106,19 @@ public enum Command {
 			s.send(InetAddress.getByName(params[1]), params[2]);
 		}
 		public void help(ConnectionSocket s) {
-			s.sendServerMessage("Use of /to:\n\t/to <destination ip address> <message>");
+			s.sendServerMessage("Send message only to specified ip adress");
+			s.sendServerMessage("Usage of /to:\n\t/to <destination ip adress> <message>");
+		}
+	},
+	ALL {
+		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
+			for(Connection c : s.getConnections()) {
+				c.send(params[1]);
+			}
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("Send message to all connected ip adresses");
+			s.sendServerMessage("Usage of /all:\n\t/all <message>");
 		}
 	};
 	
