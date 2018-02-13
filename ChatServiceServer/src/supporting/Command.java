@@ -13,7 +13,7 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("Closes all open connections and quits program");
-			s.sendServerMessage("Usage of /quit:\n\t/quit");
+			s.sendServerMessage("Usage of /quit:\n\t\t/quit");
 		}
 	},
 	Q {
@@ -30,7 +30,7 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("Set Main Connection to <destination ip adress>");
-			s.sendServerMessage("Usage of /with:\n\t/with <destination ip adress>");
+			s.sendServerMessage("Usage of /with:\n\t\t/with <destination ip adress>");
 		}
 	},
 	W {
@@ -52,7 +52,7 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("Add <ip adress> to list of connections");
-			s.sendServerMessage("Usage of /connect:\n\t/connect <ip adress of intended connection>");
+			s.sendServerMessage("Usage of /connect:\n\t\t/connect <ip adress of intended connection>");
 		}
 	},
 	C {
@@ -73,7 +73,7 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("End connection to <ip adress>");
-			s.sendServerMessage("Usage of /disconnect:\n\t/disconnect <ip adress>");
+			s.sendServerMessage("Usage of /disconnect:\n\t\t/disconnect <ip adress>");
 		}
 	},
 	DC {
@@ -90,7 +90,7 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("End connection to all connected IPs");
-			s.sendServerMessage("Usage of /disconnectall:\n\t/disconnectall");
+			s.sendServerMessage("Usage of /disconnectall:\n\t\t/disconnectall");
 		}
 	},
 	DCA {
@@ -107,7 +107,7 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("Send message only to specified ip adress");
-			s.sendServerMessage("Usage of /to:\n\t/to <destination ip adress> <message>");
+			s.sendServerMessage("Usage of /to:\n\t\t/to <destination ip adress> <message>");
 		}
 	},
 	ALL {
@@ -118,7 +118,33 @@ public enum Command {
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("Send message to all connected ip adresses");
-			s.sendServerMessage("Usage of /all:\n\t/all <message>");
+			s.sendServerMessage("Usage of /all:\n\t\t/all <message>");
+		}
+	},
+	HELP {
+		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
+			try {
+				if(params[1].length() > 0) Command.valueOf(params[1].toUpperCase()).help(s);
+				else throw new ArrayIndexOutOfBoundsException();
+			} catch(ArrayIndexOutOfBoundsException e) {
+				s.sendServerMessage("List of all commands:");
+				for(Command command : Command.values()) {
+					s.send("\t\t" + command.toString().toUpperCase());
+				}
+			}
+		}
+		
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("Show usage of specific command or list all commands");
+			s.sendServerMessage("Usage of /help:\n\t\t/help [<command>]");
+		}
+	},
+	H {
+		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException{
+			HELP.execute(s, params);
+		}
+		public void help(ConnectionSocket s) {
+			s.sendServerMessage("See /help");
 		}
 	};
 	

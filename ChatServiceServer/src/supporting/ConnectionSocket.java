@@ -20,6 +20,7 @@ public class ConnectionSocket {
 	public Scanner input;
 	private PrintWriter output;
 	private Connection mainConnection;
+	private String prompt = "> ";
 	
 	public ConnectionSocket(Socket socket) {
 		this.socket = socket;
@@ -99,6 +100,10 @@ public class ConnectionSocket {
 	public void sendServerMessage(String message) {
 		System.out.println("[Server] --> " + this.getSocket().getInetAddress() + " " + message);
 		send("[Server] " + message);
+	}
+	
+	public void prompt() {
+		send(frontend.Server.PROMPT_CODE + prompt);
 	}
 	
 	public Connection getMainConnection() {
