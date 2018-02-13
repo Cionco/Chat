@@ -5,13 +5,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Scanner;
 
 public class Client {
 	
 	private static volatile boolean run = true;
-	static String EXIT_CONNECTION_CODE = "%&/(=)(/&%%ojgoOUHFEXITOihg&%&/()";
+	final static String EXIT_CONNECTION_CODE = "%&/(=)(/&%%ojgoOUHFEXITOihg&%&/()";
+	final static String PROMPT_CODE = "/§)§/IFJFPROMPTJFZD%UW&\"";
 
 	public static void main(String[] args) {
 		Scanner keyboard = new Scanner(System.in);
@@ -24,7 +27,7 @@ public class Client {
 		
 		System.out.println("Versuche Verbindung mit Server aufzubauen...");
 		
-		try (Socket socket = new Socket("10.61.14.182", 5555)){
+		try (Socket socket = createSocket(ip, 5555, 2000)){
 			System.out.println("Verbindung aufgebaut!");
 			PrintWriter output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 			Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
@@ -35,6 +38,7 @@ public class Client {
 					while(run) {
 						String read = input.nextLine();
 						if(read.equals(EXIT_CONNECTION_CODE)) lock();
+						else if(read.startsWith(PROMPT_CODE)) System.out.print(read.substring(PROMPT_CODE.length()));
 						else System.out.println(read);					
 					}
 				}
@@ -50,6 +54,10 @@ public class Client {
 			input.close();
 			output.close();
 		} catch(IOException e) {
+			if(e.getClass().equals(SocketTimeoutException.class)) {
+				System.out.println("Server konnte nicht erreicht werden!");
+				System.exit(-1);
+			}
 			e.printStackTrace();
 		}
 	}
@@ -63,5 +71,11 @@ public class Client {
 		for(String _bytecheck : split)
 			_byte = (Integer.parseInt(_bytecheck) & 0xFFFFFF00) == 0 && _byte;
 		return check.split("\\.").length == 4 && _byte;
+	}
+	
+	private static Socket createSocket(String ip, int port, int timeout) throws IOException, SocketTimeoutException {
+		Socket socket = new Socket();
+		socket.connect(new InetSocketAddress(ip, port), timeout);
+		return socket;
 	}
 }
