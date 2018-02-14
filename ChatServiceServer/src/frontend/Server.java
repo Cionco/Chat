@@ -87,9 +87,11 @@ public class Server {
 			if(s.getMainConnection() == null) System.out.println("Message from " + s.getSocket().getInetAddress() + ": " + message);
 			else {
 				System.out.println(s.getSocket().getInetAddress() + " --> " + s.getMainConnection().getIP() + " " + message);
-				s.getMainConnection().send("[" + s.getSocket().getInetAddress() + "] " + message);
+				s.getMainConnection().send(s.deletePrompt() + "[" + s.getSocket().getInetAddress() + "] " + message);
+				s.getMainConnection().getConnectionSocket().prompt();
 			}
 		}
+		s.prompt();
 	}
 
 	private synchronized static void addNewSocket(Socket newSocket) {

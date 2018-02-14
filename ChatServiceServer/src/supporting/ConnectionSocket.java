@@ -19,7 +19,7 @@ public class ConnectionSocket {
 	private Socket socket;
 	public Scanner input;
 	private PrintWriter output;
-	private Connection mainConnection;
+	private Connection mainConnection = null;
 	private String prompt = "> ";
 	
 	public ConnectionSocket(Socket socket) {
@@ -38,7 +38,7 @@ public class ConnectionSocket {
 	
 	private void addConnection(Connection connection) {
 		connections.add(connection);
-		mainConnection = connection;
+		if(mainConnection == null) setMainConnection(connection);
 	}
 	
 	public void addConnection(InetAddress ip, ConnectionSocket socket) {
@@ -46,12 +46,12 @@ public class ConnectionSocket {
 	}
 	
 	public void removeConnection(Connection connection) {
-		if(connection.getIP().toString().equals(socket.getInetAddress().toString())) mainConnection = null;
+		if(connection.getIP().toString().equals(socket.getInetAddress().toString())) setMainConnection(null);
 		connections.remove(connection);		
 	}
 	
 	public void removeConnection(InetAddress ip) throws UnknownHostException {
-		mainConnection = null;
+		if(mainConnection.getIP().equals(ip)) setMainConnection(null);
 		removeConnection(findConnectionByIp(ip));	
 	}
 	
@@ -85,8 +85,13 @@ public class ConnectionSocket {
 	 * Only for Server Messages
 	 * @param message The message that will be sent to the Client
 	 */
+	public void send(String message, boolean delprompt) {
+		String mes = (delprompt?deletePrompt():"").concat(message);
+		output.println(mes);
+	}
+	
 	public void send(String message) {
-		output.println(message);
+		send(message, false);
 	}
 	
 	public void send(InetAddress ip, String message) throws UnknownHostException {
@@ -97,13 +102,23 @@ public class ConnectionSocket {
 		}
 	}
 	
-	public void sendServerMessage(String message) {
+	public void sendServerMessage(String message, boolean delprompt) {
 		System.out.println("[Server] --> " + this.getSocket().getInetAddress() + " " + message);
-		send("[Server] " + message);
+		send("[Server] " + message, delprompt);
+	}
+	
+	public void sendServerMessage(String message) {
+		sendServerMessage(message, false);
+	}
+	
+	public String deletePrompt() {
+		String buf = "";
+		for(int i = 0; i < prompt.length(); i++) buf += "\b \b";
+		return buf;
 	}
 	
 	public void prompt() {
-		send(frontend.Server.PROMPT_CODE + prompt);
+		output.println(frontend.Server.PROMPT_CODE + prompt);
 	}
 	
 	public Connection getMainConnection() {
@@ -112,6 +127,8 @@ public class ConnectionSocket {
 	
 	public void setMainConnection(Connection c) {
 		mainConnection = c;
+		if(c == null) prompt = "> ";
+		else prompt = c.getIP().toString() + "> ";
 	}
 	
 	public ArrayList<Connection> getConnections() {

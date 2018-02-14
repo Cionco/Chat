@@ -48,7 +48,8 @@ public enum Command {
 				socket.addConnection(s.getSocket().getInetAddress(), s); //Add the Connection to the found Socket
 				System.out.println(s.getSocket().getInetAddress() + " now connected to " + socket.getSocket().getInetAddress());
 				s.sendServerMessage("You are now connected to " + socket.getSocket().getInetAddress());
-				socket.sendServerMessage(s.getSocket().getInetAddress() + " has just connected to you!");
+				socket.sendServerMessage(s.getSocket().getInetAddress() + " has just connected to you!", true);
+				socket.prompt();
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("Add <ip adress> to list of connections");
@@ -67,9 +68,10 @@ public enum Command {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			ConnectionSocket socket = s.findConnectionByIp(InetAddress.getByName(params[1])).getConnectionSocket();
 			socket.removeConnection(s.getSocket().getInetAddress());
-			socket.sendServerMessage(s.getSocket().getInetAddress() + " has ended the connection to you");
+			socket.sendServerMessage(s.getSocket().getInetAddress() + " has ended the connection to you", true);
 			s.removeConnection(InetAddress.getByName(params[1]));
 			s.sendServerMessage(socket.getSocket().getInetAddress() + " is no longer connected to you!");
+			socket.prompt();
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("End connection to <ip adress>");
@@ -87,6 +89,7 @@ public enum Command {
 	DISCONNECTALL {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			for(Connection c : s.getConnections()) DISCONNECT.execute(s, new String[]{"", c.getIP().toString().substring(1)});
+			s.prompt();
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("End connection to all connected IPs");
@@ -114,6 +117,7 @@ public enum Command {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
 			for(Connection c : s.getConnections()) {
 				c.send(params[1]);
+				c.getConnectionSocket().prompt();
 			}
 		}
 		public void help(ConnectionSocket s) {
