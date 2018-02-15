@@ -21,6 +21,7 @@ public class ConnectionSocket {
 	private PrintWriter output;
 	private Connection mainConnection = null;
 	private String prompt = "> ";
+	public boolean prompted = false;
 	
 	public ConnectionSocket(Socket socket) {
 		this.socket = socket;
@@ -63,11 +64,10 @@ public class ConnectionSocket {
 	}
 	
 	public static void close(ConnectionSocket socket) {
-		for(Connection c : socket.connections) {
-			for( Connection cc : c.getConnectionSocket().connections) //Find and remove the corresponding Connection
-				if(cc.getIP() == socket.getSocket().getInetAddress()) //in the connected Socket´s list of Connections
-					c.getConnectionSocket().connections.remove(cc);
-			socket.connections.remove(c);
+		try {
+			Command.DISCONNECTALL.execute(socket, new String[0]);
+		} catch(UnknownHostException e) {
+			e.printStackTrace();
 		}
 		socket.send(frontend.Server.EXIT_CONNECTION_CODE);
 		try {
@@ -88,6 +88,7 @@ public class ConnectionSocket {
 	public void send(String message, boolean delprompt) {
 		String mes = (delprompt?deletePrompt():"").concat(message);
 		output.println(mes);
+		prompted = false;
 	}
 	
 	public void send(String message) {
@@ -119,6 +120,7 @@ public class ConnectionSocket {
 	
 	public void prompt() {
 		output.println(frontend.Server.PROMPT_CODE + prompt);
+		prompted = true;
 	}
 	
 	public Connection getMainConnection() {

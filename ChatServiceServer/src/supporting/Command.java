@@ -2,6 +2,7 @@ package supporting;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import frontend.Server;
 
@@ -88,8 +89,8 @@ public enum Command {
 	},
 	DISCONNECTALL {
 		public void execute(ConnectionSocket s, String[] params) throws UnknownHostException, ArrayIndexOutOfBoundsException {
-			for(Connection c : s.getConnections()) DISCONNECT.execute(s, new String[]{"", c.getIP().toString().substring(1)});
-			s.prompt();
+			List<Connection> connections = s.getConnections();
+			for(/*Connection c : s.getConnections()*/int i = connections.size() - 1; i >= 0; i--) DISCONNECT.execute(s, new String[]{"", connections.get(i).getIP().toString().substring(1)});
 		}
 		public void help(ConnectionSocket s) {
 			s.sendServerMessage("End connection to all connected IPs");
