@@ -21,7 +21,6 @@ public class ConnectionSocket {
 	private PrintWriter output;
 	private Connection mainConnection = null;
 	private String prompt = "> ";
-	public boolean prompted = false;
 	
 	public ConnectionSocket(Socket socket) {
 		this.socket = socket;
@@ -88,7 +87,6 @@ public class ConnectionSocket {
 	public void send(String message, boolean delprompt) {
 		String mes = (delprompt?deletePrompt():"").concat(message);
 		output.println(mes);
-		prompted = false;
 	}
 	
 	public void send(String message) {
@@ -120,7 +118,6 @@ public class ConnectionSocket {
 	
 	public void prompt() {
 		output.println(frontend.Server.PROMPT_CODE + prompt);
-		prompted = true;
 	}
 	
 	public Connection getMainConnection() {
