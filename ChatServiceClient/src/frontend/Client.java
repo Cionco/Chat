@@ -10,11 +10,14 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Scanner;
 
+import supporting.Encryption;
+
 public class Client {
 	
 	private static volatile boolean run = true;
 	final static String EXIT_CONNECTION_CODE = "%&/(=)(/&%%ojgoOUHFEXITOihg&%&/()";
 	final static String PROMPT_CODE = "/§)§/IFJFPROMPTJFZD%UW&\"";
+	private static byte[] aesKey;
 
 	public static void main(String[] args) {
 		Scanner keyboard = new Scanner(System.in);
@@ -31,7 +34,8 @@ public class Client {
 			System.out.println("Verbindung aufgebaut!");
 			PrintWriter output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 			Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
-			
+			aesKey = Encryption.initializeEncryptionProtocol(socket.getInputStream(), socket.getOutputStream());
+
 			Thread reciever = new Thread(new Runnable() {
 				@Override
 				public void run() {

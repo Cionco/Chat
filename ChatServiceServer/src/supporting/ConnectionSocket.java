@@ -21,6 +21,7 @@ public class ConnectionSocket {
 	private PrintWriter output;
 	private Connection mainConnection = null;
 	private String prompt = "> ";
+	private byte[] aesKey = null;
 	
 	public ConnectionSocket(Socket socket) {
 		this.socket = socket;
@@ -128,6 +129,14 @@ public class ConnectionSocket {
 		mainConnection = c;
 		if(c == null) prompt = "> ";
 		else prompt = c.getIP().toString() + "> ";
+	}
+	
+	public void setAesKey(byte[] key) {
+		this.aesKey = key;
+	}
+	
+	public byte[] getAesKey() {
+		return aesKey;
 	}
 	
 	public ArrayList<Connection> getConnections() {

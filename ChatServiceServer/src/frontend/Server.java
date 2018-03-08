@@ -9,6 +9,7 @@ import java.util.ConcurrentModificationException;
 
 import supporting.Command;
 import supporting.ConnectionSocket;
+import supporting.Encryption;
 
 public class Server {
 
@@ -96,7 +97,9 @@ public class Server {
 
 	private synchronized static void addNewSocket(Socket newSocket) {
 		ConnectionSocket newCSocket = new ConnectionSocket(newSocket);
-		System.out.println("New Connection: " + newCSocket.getSocket().getInetAddress());
+		byte[] aesKey = Encryption.initializeEncryptionProtocol(newCSocket);
+		newCSocket.setAesKey(aesKey);
+		System.out.println("New secure Connection: " + newCSocket.getSocket().getInetAddress());
 		sendHello(newCSocket);
 		sockets.add(newCSocket);
 		newCSocket.prompt();
