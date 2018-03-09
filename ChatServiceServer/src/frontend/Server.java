@@ -7,9 +7,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
+import encryption.Encryption;
 import supporting.Command;
 import supporting.ConnectionSocket;
-import supporting.Encryption;
 
 public class Server {
 
