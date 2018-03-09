@@ -24,7 +24,7 @@ public class Encryption {
 	
 	public static void main(String[] args) {
 		//initializeEncryptionProtocol(null);
-		AESEncrypt(new Byte[]{ (byte) 0xa1, 0x34, (byte) 0x00b5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6c
+		AESEncrypt(new byte[]{ (byte) 0xa1, 0x34, (byte) 0xb5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6c
 				, (byte) 0xa1, 0x34, (byte) 0x00b5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6b
 				, (byte) 0xa1, 0x34, (byte) 0x00b5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6a}, null);
 	}
@@ -75,29 +75,29 @@ public class Encryption {
 		return null;
 	}
 	
-	public static byte[] AESEncrypt(Byte[] ciphertext, byte[] key) {
+	public static byte[] AESEncrypt(byte[] ciphertext, byte[] key) {
 		if(ciphertext.length == 0) return null;
-		printHex(ciphertext);
+		//printHex(ciphertext);
 		Integer[] block = buildBlock(ciphertext);
-		
-		printHex(block);
-		
+		Block blockclass = new Block(arrayToIndex(15, ciphertext));
+		//printHex(block);
+		blockclass.printBlock();
 		
 		
 		//byte[] encrypted_block = null;
 		
 		//byte[] encrypted_message = AESEncrypt(arrayFromIndex(16, ciphertext), key);
 		//return expand_array(encrypted_block, encrypted_message);
-		return AESEncrypt(arrayFromIndex(16, ciphertext), key);
-		
+		//return AESEncrypt(arrayFromIndex(16, ciphertext), key);
+		return null;
 	}
 
 	/** 
-	 * Build 16 Byte Block from the Ciphertext split into 4 DWORDS represented by Integers
+	 * Build 16 byte Block from the Ciphertext split into 4 DWORDS represented by Integers
 	 * @param ciphertext
 	 * @return the block as Integer[]
 	 */
-	private static Integer[] buildBlock(Byte[] ciphertext) {
+	private static Integer[] buildBlock(byte[] ciphertext) {
 		Integer[] block = new Integer[]{0, 0, 0, 0};
 		for(int i = 0; i < 4; i++) {
 			for(int j = 0; j < 4; j++) {
@@ -109,9 +109,15 @@ public class Encryption {
 		return block;
 	}
 	
-	private static Byte[] arrayFromIndex(int startindex, Byte[] array) {
-		Byte[] newarray = new Byte[array.length - startindex];
+	private static byte[] arrayFromIndex(int startindex, byte[] array) {
+		byte[] newarray = new byte[array.length - startindex];
 		for(int i = startindex; i < array.length; i++) newarray[i - startindex] = array[i];
+		return newarray;
+	}
+	
+	private static byte[] arrayToIndex(int endindex, byte[] array) {
+		byte[] newarray = new byte[endindex + 1];
+		for(int i = 0; i < endindex; i++) newarray[i] = array[i];
 		return newarray;
 	}
 	
@@ -133,5 +139,40 @@ public class Encryption {
 	
 	private static <E> void printHex(E value) {
 		System.out.printf("%08x\n", value);
+	}
+	
+	private static class Block {
+		byte[] bytes;
+		
+		public Block(byte[] bytes) {
+			this.bytes = bytes;
+		}
+		
+		public int getDWORD(int index) {
+			int DWORD = 0x000000;
+			for(int i = 0; i < 4; i++)
+				DWORD |= (bytes[i + index * 4] << (3 - i) * 8) & masks[i];
+			
+			return DWORD;
+		}
+		
+		private int index(int wordIndex, int byteIndex) {
+			return wordIndex * 4 + byteIndex;
+		}
+		
+		public void printBlock() {
+			for(int i = 0; i < 4; i++)
+				System.out.printf("%08x\n", getDWORD(i));
+		}
+		
+		public void shiftWord(int i, int bytes) {
+			if(bytes == 0) return;
+			byte help = this.bytes[index(i, 3)];
+			for(int j = 3; j > 0; j--)
+				this.bytes[index(i, j)] = this.bytes[index(i, j - 1)];
+			this.bytes[index(i, 0)] = help;
+			shiftWord(i, bytes - 1);
+			return;
+		}
 	}
 }
