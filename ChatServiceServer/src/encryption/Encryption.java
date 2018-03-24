@@ -4,12 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.ArrayList;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -24,15 +21,31 @@ public class Encryption {
 	
 	public static void main(String[] args) {
 		//initializeEncryptionProtocol(null);
+		byte[] key = new byte[]{0x54, 0x68, 0x61, 0x74, 0x73, 0x20, 0x6D, 0x79, 0x20, 0x4B, 0x75, 0x6E, 0x67, 0x20, 0x46, 0x75};
+
 		
-		AESEncrypt(new byte[]{ (byte) 0xa1, 0x34, (byte) 0xb5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6c
+	/*	AESEncrypt(new byte[]{ (byte) 0xa1, 0x34, (byte) 0xb5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6c
 				, (byte) 0xa1, 0x34, (byte) 0x00b5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6b
-				, (byte) 0xa1, 0x34, (byte) 0x00b5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca, 0x6a}, 
+				, (byte) 0xa1, 0x34, (byte) 0x00b5, 0x51, 0x6e, (byte) 0xf0, 0x31, 0x4a, (byte) 0xb7, 0x2c, 0x46, (byte) 0xe3, 0x51, 0x1b, (byte) 0xca}, 
 
 				new byte[]{0x2b, 0x28, (byte) 0xab, 0x09, 0x7e, (byte) 0xae, (byte) 0xf7, (byte) 0xcf, 0x15, (byte) 0xd2, 0x15, 0x4f, 0x16, (byte) 0xa6, (byte) 0x88, 0x3c});
+		*/
+		/*key = new byte[]{0x0f, 0x47, 0x0c, (byte) 0xaf, 
+						0x15, (byte) 0xd9, (byte) 0xb7, 0x7f,
+						0x71, (byte) 0xe8, (byte) 0xad, 0x67, 
+						(byte) 0xc9, 0x59, (byte) 0xd6, (byte) 0x98};
+		*/
+		int i = 0;
+		key = new byte[]{0x2b, 0x28, (byte) 0xab, 0x09, 0x7e, (byte) 0xae, (byte) 0xf7, (byte) 0xcf, 0x15, (byte) 0xd2, 0x15, 0x4f, 0x16, (byte) 0xa6, (byte) 0x88, 0x3c};
+		for(byte b : AESEncrypt(new byte[]{0x32, (byte) 0x88, 0x31, (byte) 0xe0, 0x43, 0x5a, 0x31, 0x37, (byte) 0xf6, 0x30, (byte) 0x98, 0x07, (byte) 0xa8, (byte) 0x8d, (byte) 0xa2, 0x34},
+				key)) { 
+			if(i % 16 == 0 && i != 0) System.out.println();
+			if(i++ % 4 == 0 && i != 0) System.out.println();
+			System.out.printf("%02x", b);
+		}
 	}
 	
-	private static final int ENCRYPTION_KEY_LENGTH = 512;//0x400;
+	private static final int ENCRYPTION_KEY_LENGTH = 0x400;
 
 	public static byte[] initializeEncryptionProtocol(ConnectionSocket s) {
 		KeyPairGenerator kpg = null; 
@@ -80,31 +93,20 @@ public class Encryption {
 	
 	public static byte[] AESEncrypt(byte[] ciphertext, byte[] key) {
 		if(ciphertext.length == 0) return null;
-		Integer[] block = buildBlock(ciphertext);
-		EncryptionBlock blockclass = new EncryptionBlock(arrayToIndex(15, ciphertext));
+		int buffer = 16 - (ciphertext.length % 16);
+		buffer %= 16;				//In case ciphertext.length is exactly 16
+		for(int i = 0; i < buffer; i++) ciphertext = expand_array(ciphertext, new byte[]{0x00});
+		EncryptionBlock block = new EncryptionBlock(arrayToIndex(15, ciphertext));
 		Key blockkey = new Key(key);
-		blockclass.shiftWords();
-		//byte[] encrypted_block = null;
-		blockclass.subBytes();
+		//block.print();
 		
-		System.out.println("Key");
-		Key round1 = blockkey.nextRoundKey();
-		Key round2 = round1.nextRoundKey();
-		round1.print();
-		System.out.println();
-		round2.print();
-		//byte[] encrypted_message = AESEncrypt(arrayFromIndex(16, ciphertext), key);
-		//return expand_array(encrypted_block, encrypted_message);
-		//return AESEncrypt(arrayFromIndex(16, ciphertext), key);
-		return null;
-	}
-	
-	private static byte[] encryptBlock(Block block, Block key) {
-		
-		
-		
-		
-		return null;
+		block.encrypt(blockkey);
+
+		byte[] encrypted_block = block.toByteArray();		
+		//block.print();
+		byte[] encrypted_message = AESEncrypt(arrayFromIndex(16, ciphertext), key);
+		if(encrypted_message == null) return encrypted_block;
+		return expand_array(encrypted_block, encrypted_message);
 	}
 
 	/** 
@@ -147,6 +149,7 @@ public class Encryption {
 	
 	private static abstract class Block {
 		protected byte[] bytes;
+		protected static final boolean DEBUG_FLAG = false;
 		
 		private static int[] sbox = new int[]{
 			0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 
@@ -226,12 +229,6 @@ public class Encryption {
 			for(int i = 0; i < 4; i++)
 				System.out.printf("%08x\n", getDWORD(i));
 		}
-		
-		public void shiftWord(int index, int bytes) {
-			int DWORD = getDWORD(index);
-			DWORD = OFLeftShift(DWORD, 8 * bytes);
-			setDWORD(index, DWORD);
-		}
 
 		public void subByte(int index) {
 			bytes[index] = (byte) sbox[((int) bytes[index]) & 0xff];
@@ -264,6 +261,25 @@ public class Encryption {
 		private byte OFRightShift(byte BYTE, int bits) {
 			return (byte) (((BYTE & 0xff) >>> bits) | (BYTE << (8 - bits)));
 		}
+	
+		protected byte[] DWORDtoByteArray(int DWORD) {
+			byte[] b = new byte[4];
+			for(int i = 0; i < 4; i++)
+				b[i] = (byte) (DWORD >> (( 3 - i) * 8) & 0xFF);
+			return b;
+		}
+		
+		protected int ByteArrayToDWORD(byte[] b) {
+			int DWORD = 0x00000000;
+			for(int i = 0; i < 4; i++)
+				DWORD |= (b[i] << (3 - i) * 8) & masks[i];
+			return DWORD;
+		}
+		
+		
+		public byte[] toByteArray() {
+			return bytes;
+		}
 	}
 	
 	private static class Key extends Block {
@@ -286,45 +302,121 @@ public class Encryption {
 			int DWORD = getVDWORD(3);
 			DWORD = OFLeftShift(DWORD, 8);
 			DWORD = ByteArrayToDWORD(subBytes(DWORDtoByteArray(DWORD)));
-			newRoundKey.setVDWORD(0, (DWORD ^ getVDWORD(0)) ^ Key.getRcon(round));
+			newRoundKey.setVDWORD(0, (DWORD ^ getVDWORD(0)) ^ Key.getRcon(round + 1));
 			for(int i = 0; i < 3; i++) 
 				newRoundKey.setVDWORD(i + 1, getVDWORD(i + 1) ^ newRoundKey.getVDWORD(i));
-			
+		
 			return newRoundKey;
 		}
 		
-		private byte[] DWORDtoByteArray(int DWORD) {
-			byte[] b = new byte[4];
-			for(int i = 0; i < 4; i++)
-				b[i] = (byte) (DWORD >> (( 3 - i) * 8) & 0xFF);
-			return b;
-		}
-		
-		private int ByteArrayToDWORD(byte[] b) {
-			int DWORD = 0x00000000;
-			for(int i = 0; i < 4; i++)
-				DWORD |= (b[i] << (3 - i) * 8) & masks[i];
-			return DWORD;
-		}
-		
-		private static int getRcon(int i) {
-			return (((int) Math.pow(2, i) << 24)) & masks[0];
+		private static int getRcon(int a) {
+			if(a == 0) return 0x00;
+			byte[] rcon = new byte[a];
+			for (int i = 0, x = 1; i < rcon.length; i++) {
+				rcon[i] = (byte) x;
+		    	x = (byte) ((x << 1) ^ (((x & 0x80) != 0) ? 0x1B:0x00));
+			}
+			return (rcon[rcon.length - 1] << 24) & masks[0];
 		}
 		
 	}
 	
-	private static class EncryptionBlock extends Block {
-
+	private static class EncryptionBlock extends Block {	
 		public EncryptionBlock(byte[] bytes) {
 			super(bytes);
 		}
 		
-		public void shiftWords() {
-			shiftWord(1, 1);
-			shiftWord(2, 2);
-			shiftWord(3, 3);
+		public void encrypt(Key key) {
+			addRoundKey(key);
+			key = key.nextRoundKey();
+			
+			if(DEBUG_FLAG) {
+				System.out.println("After Round Key");
+				this.print();			
+			}
+			
+			for(int i = 0; i < 9; key = key.nextRoundKey(), i++) {
+				if(DEBUG_FLAG){ 
+					System.out.println("---------------------------------");
+					System.out.println("Round " + i);
+					System.out.println("---------------------------------");
+					System.out.println("Round Key: ");
+					key.print();
+					System.out.println("---------------------------------");
+				}
+				subBytes();
+				if(DEBUG_FLAG) {
+					System.out.println("After subbytes");
+					this.print();
+				}
+				shiftWords();
+				if(DEBUG_FLAG) {
+					System.out.println("After shiftWords");
+					this.print();
+				}
+				mixColumns();
+				if(DEBUG_FLAG) {
+					System.out.println("After mixColumns");
+					this.print();
+				}
+				addRoundKey(key);
+				if(DEBUG_FLAG) {
+					System.out.println("After Round Key");
+					this.print();
+				}
+			}
+			
+			subBytes();
+			shiftWords();
+			addRoundKey(key);
+			
 		}
 		
+		private void shiftWords() {
+			for(int i = 1; i <= 3; i++)
+				shiftWord(i, i);
+		}
+		
+		private void mixColumns() {
+			for(int i = 0; i < 4; i++)
+				setVDWORD(i, ByteArrayToDWORD(mixColumn(DWORDtoByteArray(getVDWORD(i)))));
+		}
+		
+		private void addRoundKey(Key key) {
+			for(int i = 0; i < 4; i++)
+				this.setDWORD(i, getDWORD(i) ^ key.getDWORD(i));
+		}
+		
+		
+		private byte[] mixColumn(byte[] r) {
+			byte a[] = new byte[4];
+			byte b[] = new byte[4];
+			byte c;
+			byte h;
+			/* The array 'a' is simply a copy of the input array 'r'
+			 * The array 'b' is each element of the array 'a' multiplied by 2
+			 * in Rijndael's Galois field
+			 * a[n] ^ b[n] is element n multiplied by 3 in Rijndael's Galois field */ 
+			for (c = 0; c < 4; c++) {
+				a[c] = r[c];
+				/* h is 0xff if the high bit of r[c] is set, 0 otherwise */
+				h = (byte)(r[c] >> 7); /* arithmetic right shift, thus shifting in either zeros or ones */
+				b[c] = (byte) (r[c] << 1); /* implicitly removes high bit because b[c] is an 8-bit char, so we xor by 0x1b and not 0x11b in the next line */
+				b[c] ^= 0x1B & h; /* Rijndael's Galois field */
+			}
+			r[0] = (byte) (b[0] ^ a[3] ^ a[2] ^ b[1] ^ a[1]); /* 2 * a0 + a3 + a2 + 3 * a1 */
+			r[1] = (byte) (b[1] ^ a[0] ^ a[3] ^ b[2] ^ a[2]); /* 2 * a1 + a0 + a3 + 3 * a2 */
+			r[2] = (byte) (b[2] ^ a[1] ^ a[0] ^ b[3] ^ a[3]); /* 2 * a2 + a1 + a0 + 3 * a3 */
+			r[3] = (byte) (b[3] ^ a[2] ^ a[1] ^ b[0] ^ a[0]); /* 2 * a3 + a2 + a1 + 3 * a0 */
+			
+			return r;
+		}
+		
+		public void shiftWord(int index, int bytes) {
+			int DWORD = getDWORD(index);
+			DWORD = OFLeftShift(DWORD, 8 * bytes);
+			setDWORD(index, DWORD);
+		}
 	}
 	
 	
