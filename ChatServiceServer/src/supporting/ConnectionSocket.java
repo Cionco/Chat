@@ -1,6 +1,8 @@
 package supporting;
 
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -17,8 +19,8 @@ public class ConnectionSocket {
 
 	private ArrayList<Connection> connections;
 	private Socket socket;
-	public Scanner input;
-	private PrintWriter output;
+	public DataInputStream input;
+	private DataOutputStream output;
 	private Connection mainConnection = null;
 	private String prompt = "> ";
 	private byte[] aesKey = null;
@@ -27,8 +29,8 @@ public class ConnectionSocket {
 		this.socket = socket;
 		try {
 			connections = new ArrayList<>();
-			input = new Scanner(new InputStreamReader(socket.getInputStream()));
-			output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+			input = new DataInputStream(socket.getInputStream());
+			output = new DataOutputStream(socket.getOutputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -87,7 +89,11 @@ public class ConnectionSocket {
 	 */
 	public void send(String message, boolean delprompt) {
 		String mes = (delprompt?deletePrompt():"").concat(message);
-		output.println(mes);
+		try {
+			Communication.write(output, mes, aesKey);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void send(String message) {
@@ -118,7 +124,10 @@ public class ConnectionSocket {
 	}
 	
 	public void prompt() {
-		output.println(frontend.Server.PROMPT_CODE + prompt);
+		try {
+			Communication.write(output, frontend.Server.PROMPT_CODE + prompt, aesKey);
+		} catch (IOException e) {
+		}
 	}
 	
 	public Connection getMainConnection() {

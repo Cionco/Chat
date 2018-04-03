@@ -7,9 +7,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
-import encryption.Encryption;
-import supporting.Command;
-import supporting.ConnectionSocket;
+import encryption.*;
+import supporting.*;
 
 public class Server {
 
@@ -49,7 +48,7 @@ public class Server {
 			for(ConnectionSocket s : sockets) {	
 				try {
 					if(s.getSocket().getInputStream().available() != 0) {
-						String message = s.input.nextLine();
+						String message = Communication.read(s.input, s.getAesKey());
 						process_message(s, message);
 					}
 				} catch (IOException e) {
@@ -93,6 +92,7 @@ public class Server {
 			}
 		}
 		s.prompt();
+		
 	}
 
 	private synchronized static void addNewSocket(Socket newSocket) {
