@@ -13,7 +13,6 @@ import java.net.SocketTimeoutException;
 import java.util.Scanner;
 
 import encryption.Encryption;
-import encryption.AESEncryption;
 
 import supporting.Communication;
 
@@ -37,9 +36,7 @@ public class Client {
 		
 		try (Socket socket = createSocket(ip, 5555, 2000)){
 			System.out.println("Verbindung aufgebaut!");
-			PrintWriter output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 			DataOutputStream s_output = new DataOutputStream(socket.getOutputStream());
-			Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
 			DataInputStream s_input = new DataInputStream(socket.getInputStream());
 			aesKey = Encryption.initializeEncryptionProtocol(socket.getInputStream(), socket.getOutputStream());
 
@@ -63,8 +60,8 @@ public class Client {
 			}
 			
 			keyboard.close();
-			input.close();
-			output.close();
+			s_output.close();
+			s_input.close();
 		} catch(IOException e) {
 			if(e.getClass().equals(SocketTimeoutException.class)) {
 				System.out.println("Server konnte nicht erreicht werden!");

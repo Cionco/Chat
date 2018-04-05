@@ -1,7 +1,11 @@
 package supporting;
 
-import java.io.*;
-import java.net.*;
+import java.io.PrintWriter;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.InetAddress;
 
 public class Connection {
 
@@ -32,6 +36,9 @@ public class Connection {
 	}
 	
 	public void send(String message) {
-		output.println(message);
+		//output.println(message);
+		
+		
+		socket.send(message);
 	}
 }
